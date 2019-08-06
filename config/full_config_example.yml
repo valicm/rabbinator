@@ -1,0 +1,20 @@
+type: "mandrill"
+api_key: "your_api_key"
+client:
+  uri: "amqp://guest:guest@foreo.loc:5672"
+  queue:
+    durable: true
+    autodelete: false
+    exclusive: true
+    nowait: false
+    args: []
+  prefetch:
+    count: 1
+    size: 0
+    global: false
+  consume:
+    autoack: false
+    exclusive: false
+    nolocal: false
+    nowait: false
+    args: []
