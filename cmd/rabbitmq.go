@@ -1,34 +1,38 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"log"
-	"rabbinator/cmd/consumers/mailchimp"
-	_ "rabbinator/cmd/consumers/mailchimp"
-	"rabbinator/cmd/consumers/mandrill"
-	_ "rabbinator/cmd/consumers/mandrill"
+	"rabbinator/cmd/providers/mailchimp"
+	"rabbinator/cmd/providers/mandrill"
+	"rabbinator/cmd/utility"
 )
 
-// Rabbit connection handler and processing items.
-func Connect() {
+// Initialize all task necessarily for establishing connection.
+func Initialize(channel string, configFile string)  {
 
-	var clientChannel string = viper.GetString("channel")
-	var queueType string = viper.GetString("type")
-	var acknowledge bool
-	//var message string
+	// Initialize and set config.
+	utility.ConfigSetup(channel, configFile)
+
+	// Make connection to rabbitmq.
+	connectRabbitMQ()
+}
+
+// Rabbit connection handler and processing items.
+func connectRabbitMQ() {
+
+	var clientChannel = viper.GetString("channel")
+	var queueType = viper.GetString("type")
 
 	// Start connection.
 	conn, err := amqp.Dial(viper.GetString("client.uri"))
-	failOnError(err, "Failed to connect to RabbitMQ")
+	utility.ErrorLog("Failed to connect to RabbitMQ", err)
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	utility.ErrorLog("Failed to open a channel", err)
 	defer ch.Close()
-
-	fmt.Println(clientChannel);
 
 	// Declare queue.
 	q, err := ch.QueueDeclare(
@@ -37,9 +41,9 @@ func Connect() {
 		viper.GetBool("client.queue.autodelete"),
 		viper.GetBool("client.queue.exclusive"),
 		viper.GetBool("client.queue.nowait"),
-		nil,    // arguments
+		nil,
 	)
-	failOnError(err, "Failed to declare a queue")
+	utility.ErrorLog("Failed to declare a queue", err)
 
 	err = ch.Qos(
 		viper.GetInt("client.prefetch.count"),
@@ -47,7 +51,7 @@ func Connect() {
 		viper.GetBool("client.prefetch.global"),
 	)
 
-	failOnError(err, "Failed to set QoS")
+	utility.ErrorLog("Failed to set QoS", err)
 
 	msgs, err := ch.Consume(
 		clientChannel,
@@ -58,21 +62,14 @@ func Connect() {
 		viper.GetBool("client.consume.nowait"),
 		nil,
 	)
-	failOnError(err, "Failed to register a consumer")
+	utility.ErrorLog("Failed to register a consumer", err)
 
 	forever := make(chan bool)
 
 	go func() {
 		for d := range msgs {
-			switch queueType {
-			case "mandrill":
-				acknowledge  = mandrill.Mandrill(d.Body)
-			case "mailchimp":
-				acknowledge = mailchimp.Mailchimp(d.Body)
-			}
-			log.Printf("Received a message: %s", d.Body)
-
-			d.Ack(acknowledge)
+			// Process queue items.
+			processQueueItem(d, queueType)
 		}
 	}()
 
@@ -80,8 +77,19 @@ func Connect() {
 	<-forever
 }
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
+// Process queue item.
+// TODO: make it dynamic?
+func processQueueItem(Delivery amqp.Delivery, queueType string) {
+
+	switch queueType {
+	case "mandrill":
+		mandrill.ProcessItem(Delivery)
+	case "mailchimp":
+		mailchimp.ProcessItem(Delivery)
+
+	default:
+		// TODO: Reject item and write syslog?
+		//Delivery.Acknowledger.Reject()
 	}
+
 }

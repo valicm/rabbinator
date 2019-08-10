@@ -23,10 +23,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize and set config.
-	cmd.ConfigSetup(*channel, *config)
-
-	// RabbitMQ connect.
-	cmd.Connect()
+	// Initialize configuration setup and RabbitMQ connection.
+	cmd.Initialize(*channel, *config)
 
 }

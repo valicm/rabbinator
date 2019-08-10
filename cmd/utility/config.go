@@ -1,4 +1,4 @@
-package cmd
+package utility
 
 import (
 	"fmt"
@@ -43,6 +43,7 @@ func ConfigSetup(channel string, configFile string) {
 	if queueType != "mandrill" && queueType != "mailchimp" {
 		panic(fmt.Errorf("not supported queue type or values is non existing"))
 	}
+
 }
 
 // Set default values.
