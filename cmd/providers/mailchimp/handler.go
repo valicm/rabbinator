@@ -16,7 +16,6 @@ type Mailchimp struct {
 		MergeVars   []string `json:"merge_vars, omitempty"`
 		Interests   []string `json:"interests, omitempty"`
 	} `json:"args"`
-	Type string `default:"mailchimp"`
 }
 
 func ProcessItem(Delivery amqp.Delivery) {
