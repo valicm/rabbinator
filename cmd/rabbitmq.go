@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"log"
 	"rabbinator/cmd/providers/mailchimp"
@@ -9,24 +8,24 @@ import (
 	"rabbinator/cmd/utility"
 )
 
+// Stored configuration for processing queue.
+var config utility.Config
+
 // Initialize all task necessarily for establishing connection.
-func Initialize(channel string, configFile string)  {
+func Initialize(consumer string, configDir string)  {
 
 	// Initialize and set config.
-	utility.ConfigSetup(channel, configFile)
+	config = utility.ConfigSetup(consumer, configDir)
 
-	// Make connection to rabbitmq.
+	// Make connection to RabbitMQ.
 	connectRabbitMQ()
 }
 
 // Rabbit connection handler and processing items.
 func connectRabbitMQ() {
 
-	var clientChannel = viper.GetString("channel")
-	var queueType = viper.GetString("type")
-
 	// Start connection.
-	conn, err := amqp.Dial(viper.GetString("client.uri"))
+	conn, err := amqp.Dial(config.Client.Uri)
 	utility.ErrorLog("Failed to connect to RabbitMQ", err)
 	defer conn.Close()
 
@@ -36,30 +35,30 @@ func connectRabbitMQ() {
 
 	// Declare queue.
 	q, err := ch.QueueDeclare(
-		clientChannel,
-		viper.GetBool("client.queue.durable"),
-		viper.GetBool("client.queue.autodelete"),
-		viper.GetBool("client.queue.exclusive"),
-		viper.GetBool("client.queue.nowait"),
+		config.QueueName,
+		config.Client.Queue.Durable,
+		config.Client.Queue.AutoDelete,
+		config.Client.Queue.Exclusive,
+		config.Client.Queue.NoWait,
 		nil,
 	)
 	utility.ErrorLog("Failed to declare a queue", err)
 
 	err = ch.Qos(
-		viper.GetInt("client.prefetch.count"),
-		viper.GetInt("client.prefetch.size"),
-		viper.GetBool("client.prefetch.global"),
+		config.Client.Prefetch.Count,
+		config.Client.Prefetch.Size,
+		config.Client.Prefetch.Global,
 	)
 
 	utility.ErrorLog("Failed to set QoS", err)
 
 	msgs, err := ch.Consume(
-		clientChannel,
-		q.Name,
-		viper.GetBool("client.consume.autoack"),
-		viper.GetBool("client.consume.exclusive"),
-		viper.GetBool("client.consume.nolocal"),
-		viper.GetBool("client.consume.nowait"),
+		config.QueueName,
+		config.Consumer + q.Name,
+		config.Client.Consume.AutoAck,
+		config.Client.Consume.Exclusive,
+		config.Client.Consume.NoLocal,
+		config.Client.Consume.NoWait,
 		nil,
 	)
 	utility.ErrorLog("Failed to register a consumer", err)
@@ -69,7 +68,7 @@ func connectRabbitMQ() {
 	go func() {
 		for d := range msgs {
 			// Process queue items.
-			processQueueItem(d, queueType)
+			processQueueItem(d)
 		}
 	}()
 
@@ -79,13 +78,13 @@ func connectRabbitMQ() {
 
 // Process queue item.
 // TODO: make it dynamic?
-func processQueueItem(Delivery amqp.Delivery, queueType string) {
+func processQueueItem(Delivery amqp.Delivery) {
 
-	switch queueType {
+	switch config.Type {
 	case "mandrill":
-		mandrill.ProcessItem(Delivery)
+		mandrill.ProcessItem(Delivery, config.ApiKey)
 	case "mailchimp":
-		mailchimp.ProcessItem(Delivery)
+		mailchimp.ProcessItem(Delivery, config.ApiKey)
 
 	default:
 		// TODO: Reject item and write syslog?

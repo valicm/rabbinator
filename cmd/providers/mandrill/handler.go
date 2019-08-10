@@ -45,8 +45,9 @@ type Mandrill struct{
 
 }
 
-// Process queue item.
-func ProcessItem(Delivery amqp.Delivery) {
+// Process queue item. Unmarshal data to Mandrill struct
+// Preform API calls and set Delivery.Acknowledger status.
+func ProcessItem(Delivery amqp.Delivery, apiKey string) {
 	var data Mandrill
 
 	err := json.Unmarshal(Delivery.Body, &data)
@@ -54,5 +55,7 @@ func ProcessItem(Delivery amqp.Delivery) {
 		fmt.Println("There was an error:", err)
 		//Delivery.Acknowledger.Reject()
 	}
+
+	fmt.Println(data)
 
 }

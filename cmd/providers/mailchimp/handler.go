@@ -18,7 +18,9 @@ type Mailchimp struct {
 	} `json:"args"`
 }
 
-func ProcessItem(Delivery amqp.Delivery) {
+// Process queue item. Unmarshal data to Mailchimp struct
+// Preform API calls and set Delivery.Acknowledger status.
+func ProcessItem(Delivery amqp.Delivery, apiKey string) {
 	var data Mailchimp
 
 	err := json.Unmarshal(Delivery.Body, &data)
