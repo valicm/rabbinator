@@ -31,6 +31,10 @@ type Config struct {
 			NoWait    bool `yaml:"nowait, omitempty"`
 		} `yaml:"consume"`
 	} `yaml:"client"`
+	Templates struct{
+		Default string `yaml:"default, omitempty"`
+		Modules map[string]string `yaml:"modules, omitempty"`
+	} `yaml:"templates, omitempty"`
 }
 
 // Check config file and build configuration array.
@@ -64,6 +68,12 @@ func ConfigSetup(consumer string, configDir string) Config {
 			// Config file was found but another error was produced
 			panic(fmt.Errorf("Fatal error config file: %s \n", err))
 		}
+	}
+
+	// Specific case for mandrill queue type, set default value
+	// for template which fallbacks to blank.
+	if viper.GetString("type") == "mandrill" {
+		viper.SetDefault("templates.default", "blank")
 	}
 
 	// Define configuration variable.
