@@ -1,6 +1,6 @@
 type: "mandrill"
-api_key: "your_api_key"
-queue_name: "rabbitmq_name_of_mandrill_queue"
+apiKey: "your_api_key"
+queueName: "rabbitmq_name_of_mandrill_queue"
 client:
   uri: "amqp://guest:guest@foreo.loc:5672"
   queue:

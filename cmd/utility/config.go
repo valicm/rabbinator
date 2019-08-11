@@ -7,30 +7,28 @@ import (
 
 // Configuration struct definition.
 type Config struct {
-	Consumer string `yaml:"consumer_tag"`
-	Type string `yaml:"type"`
-	QueueName string `yaml:"queue_name"`
-	ApiKey string `yaml:"api_key"`
-	Client struct{
-		Uri string `yaml:"uri, omitempty"`
-		Queue struct{
-			Durable bool `yaml:"durable, omitempty"`
+	Type      string `yaml:"type"`
+	QueueName string `yaml:"queueName"`
+	ApiKey    string `yaml:"apiKey"`
+	Consumer  string `yaml:"consumerTag"`
+	Client    struct {
+		Uri   string `yaml:"uri"`
+		Queue struct {
+			Durable    bool `yaml:"durable, omitempty"`
 			AutoDelete bool `yaml:"autodelete, omitempty"`
-			Exclusive bool `yaml:"exclusive, omitempty"`
-			NoWait bool `yaml:"nowait, omitempty"`
-			Args map[string]string `yaml:"args, omitempty"`
-		} `yaml:"queue, omitempty"`
-		Prefetch struct{
-			Count int `yaml:"count, omitempty"`
-			Size int `yaml:"size, omitempty"`
+			Exclusive  bool `yaml:"exclusive, omitempty"`
+			NoWait     bool `yaml:"nowait, omitempty"`
+		} `yaml:"queue"`
+		Prefetch struct {
+			Count  int  `yaml:"count, omitempty"`
+			Size   int  `yaml:"size, omitempty"`
 			Global bool `yaml:"global, omitempty"`
 		} `yaml:"prefetch"`
-		Consume struct{
-			AutoAck bool `yaml:"autoack, omitempty"`
+		Consume struct {
+			AutoAck   bool `yaml:"autoack, omitempty"`
 			Exclusive bool `yaml:"exclusive, omitempty"`
-			NoLocal bool `yaml:"nolocal, omitempty"`
-			NoWait bool `yaml:"nowait, omitempty"`
-			Args map[string]string `yaml:"args, omitempty"`
+			NoLocal   bool `yaml:"nolocal, omitempty"`
+			NoWait    bool `yaml:"nowait, omitempty"`
 		} `yaml:"consume"`
 	} `yaml:"client"`
 }
@@ -40,15 +38,13 @@ func ConfigSetup(consumer string, configDir string) Config {
 
 	// Set default config values.
 	defaultConfigSet()
+	viper.SetDefault("consumerTag", consumer)
 
 	// YML based configuration.
 	viper.SetConfigType("yaml")
 
 	// Set file name.
 	viper.SetConfigName(consumer)
-
-	// Set default value for consumer.
-	viper.SetDefault("consumer_tag", consumer)
 
 	// If config directory flag is empty we use defaults from user home folder or current folder.
 	// Otherwise use provided configuration directory from -config flag.
@@ -95,7 +91,7 @@ func ConfigSetup(consumer string, configDir string) Config {
 func defaultConfigSet() {
 
 	// We set default here, maybe some providers does not require API key.
-	viper.SetDefault("api_key", "")
+	viper.SetDefault("apiKey", "")
 
 	// Set rabbitmq settings.
 	viper.SetDefault("client.uri", "amqp://guest:guest@foreo.loc:5672")
