@@ -8,6 +8,15 @@ import (
 	"rabbinator/cmd/utility"
 )
 
+// Defines statuses upon we decide what we are doing
+// with that message.
+const (
+	QueueSuccess  = "success"
+	QueueReject  = "reject"
+	QueueRetry  = "retry"
+	QueueUnknown = "unknown"
+)
+
 // Stored configuration for processing queue.
 var config utility.Config
 
@@ -79,16 +88,28 @@ func connectRabbitMQ() {
 // Process queue item.
 // TODO: make it dynamic?
 func processQueueItem(Delivery amqp.Delivery) {
+	// Set defaults.
+	result := QueueUnknown
 
+	// Ignore default case. If type is not mapped
+	// item would be discarded from RabbitMQ.
 	switch config.Type {
 	case "mandrill":
-		mandrill.ProcessItem(Delivery, config.ApiKey)
+		result = mandrill.ProcessItem(Delivery.Body, config.ApiKey, config.Templates.Default, config.Templates.Modules)
 	case "mailchimp":
-		mailchimp.ProcessItem(Delivery, config.ApiKey)
+		result = mailchimp.ProcessItem(Delivery.Body, config.ApiKey)
+	}
 
+	// Use reject for rejecting and requeue of items.
+	switch result {
+	case QueueSuccess:
+		Delivery.Ack(true)
+	case QueueReject:
+		Delivery.Reject(false)
+	case QueueRetry:
+		Delivery.Reject(true)
 	default:
-		// TODO: Reject item and write syslog?
-		//Delivery.Acknowledger.Reject()
+		Delivery.Nack(true, false)
 	}
 
 }

@@ -4,12 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bkway/gochimp/mandrill"
-	"github.com/streadway/amqp"
+	"os"
+	"rabbinator/cmd/utility"
 )
+
+var queueStatus utility.QueueStatus
 
 // Definition for Mandrill queue item.
 type QueueItem struct {
-	Message struct {
+	Data struct {
+		// Specifics for Drupal module mandrill output
+		// Otherwise we could directly map mandrill.Message struct.
 		Id     string `json:"id"`
 		Module string `json:"module, omitempty"`
 		mandrill.Message
@@ -17,20 +22,22 @@ type QueueItem struct {
 }
 
 // Process queue item. Unmarshal data to Mandrill struct
-// Preform API calls and set Delivery.Acknowledger status.
-func ProcessItem(Delivery amqp.Delivery, apiKey string, defaultTemplate string, moduleTemplates map[string]string) bool{
+// Preform API calls and return allowed string for status.
+func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, moduleTemplates map[string]string) string{
 	var data QueueItem
 
-	//var queueTag = Delivery.DeliveryTag
-
-	err := json.Unmarshal(Delivery.Body, &data)
+	err := json.Unmarshal(QueueBody, &data)
+	// If we have mapping issue, just print an error and continue.
 	if err != nil {
-		fmt.Println("There was an error:", err)
-		//Delivery.Acknowledger.Reject(queueTag, true)
+		fmt.Println("There was an error in data mapping:", err)
 	}
 
+	// We should not reach here, but if we are.
+	// Exit from rabbinator. No point of constant requeue
+	// item if no api key is provided.
 	if apiKey == "" {
-		fmt.Println("Missing api key")
+		fmt.Println("Missing Mandrill Api key. Exiting...")
+		os.Exit(1)
 	}
 
 	client := mandrill.NewClient(apiKey)
@@ -39,26 +46,36 @@ func ProcessItem(Delivery amqp.Delivery, apiKey string, defaultTemplate string, 
 
 	templateContent = append(templateContent, mandrill.Variable{
 		Name:    "body",
-		Content: data.Message.Message.Html,
+		Content: data.Data.Message.Html,
 	})
 
 	// Specifics for usage with Drupal mandrill module,
 	// but could be reused elsewhere if needed.
-	var templateId = moduleTemplates[data.Message.Id]
+	var templateId = moduleTemplates[data.Data.Id]
 
 	// We don't have specifics. Use default template.
 	if templateId == "" {
 		templateId = defaultTemplate
 	}
 
-	send, err := client.MessagesSendTemplate(templateId, templateContent, &data.Message.Message, true, map[string]string{})
+	send, err := client.MessagesSendTemplate(templateId, templateContent, &data.Data.Message, true, map[string]string{})
 	if err != nil {
 		fmt.Println("There was an error:", err)
+		return queueStatus.Retry
 	}
 
-	fmt.Println(send)
+	// Get received status from Mandrill
+	var sentStatus = send[0].Status
+
+	// Reject or requeue messages depending on status received from Mandrill.
+	switch sentStatus {
+	case "rejected":
+	case "invalid":
+	case "error":
+		return queueStatus.Reject
+	}
 
 	// Mark message as delivered.
-	return true
+	return queueStatus.Success
 
 }
