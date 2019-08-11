@@ -71,7 +71,7 @@ func ConfigSetup(consumer string, configDir string) Config {
 
 	err := viper.Unmarshal(&config)
 	if err != nil {
-		fmt.Printf("unable to decode into config struct, %v", err)
+		panic(fmt.Errorf("unable to decode into config struct, %v", err))
 	}
 
 	// Check supported queue type.
