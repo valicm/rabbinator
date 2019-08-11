@@ -7,6 +7,7 @@ import (
 	"github.com/bkway/gochimp"
 	"os"
 	"rabbinator/cmd/utility"
+	"reflect"
 	"strings"
 )
 
@@ -32,6 +33,8 @@ type QueueItem struct {
 // Preform API calls and return string response.
 func ProcessItem(QueueBody []byte, apiKey string) string {
 	var data QueueItem
+
+	fmt.Printf("ehaaa")
 
 	err := json.Unmarshal(QueueBody, &data)
 	if err != nil {
@@ -84,11 +87,15 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 		return queueStatus.Reject
 	}
 
-	if subscribe != nil {
+	// Why this: If we on response get proper mapping to SubscriptionStatus type
+	// we are sure it is done. If you send malformed request, Mailchimp will return
+	// integer as status, and gocimp library would map it to Member type, causing error.
+	// TODO: explore gochimp logging/error improvements possibility.
+	if reflect.TypeOf(subscribe.Status).Name() == "SubscriptionStatus" {
 		return queueStatus.Success
 	}
 
-	// Retry item.
+	// Retry item. If we reached here, some strange error occurred.
 	return queueStatus.Retry
 
 }
