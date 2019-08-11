@@ -1,8 +1,8 @@
 package utility
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
+	"log"
 )
 
 // Configuration struct definition.
@@ -63,15 +63,15 @@ func ConfigSetup(consumer string, configDir string) Config {
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
-			panic(fmt.Errorf("Config file does not exist: %s \n", err))
+			log.Fatalf("%s: %s", "Config file does not exist", err)
 		} else {
 			// Config file was found but another error was produced
-			panic(fmt.Errorf("Fatal error config file: %s \n", err))
+			log.Fatalf("%s: %s", "Fatal error config file:", err)
 		}
 	}
 
 	// Specific case for mandrill queue type, set default value
-	// for template which fallbacks to blank.
+	// for template which fallback to blank.
 	if viper.GetString("type") == "mandrill" {
 		viper.SetDefault("templates.default", "blank")
 	}
@@ -81,17 +81,17 @@ func ConfigSetup(consumer string, configDir string) Config {
 
 	err := viper.Unmarshal(&config)
 	if err != nil {
-		panic(fmt.Errorf("unable to decode into config struct, %v", err))
+		log.Fatalf("%s: %s", "unable to decode into config struct", err)
 	}
 
 	// Check supported queue type.
 	if config.Type != "mandrill" && config.Type != "mailchimp" {
-		panic(fmt.Errorf("you are using unsupported provider type"))
+		log.Fatalf("%s: %s", "you are using unsupported provider type", err)
 	}
 
 	// Channel is required.
 	if config.QueueName == "" {
-		panic(fmt.Errorf("queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name"))
+		log.Fatalf("%s: %s", "queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name", err)
 	}
 
 	return config

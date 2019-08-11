@@ -35,12 +35,15 @@ func connectRabbitMQ() {
 
 	// Start connection.
 	conn, err := amqp.Dial(config.Client.Uri)
-	utility.ErrorLog("Failed to connect to RabbitMQ", err)
-	defer conn.Close()
+	if err != nil {
+		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
+	}
 
 	ch, err := conn.Channel()
-	utility.ErrorLog("Failed to open a channel", err)
-	defer ch.Close()
+	if err != nil {
+		conn.Close()
+		log.Fatalf("%s: %s", "Failed to open a channel", err)
+	}
 
 	// Declare queue.
 	q, err := ch.QueueDeclare(
@@ -51,15 +54,20 @@ func connectRabbitMQ() {
 		config.Client.Queue.NoWait,
 		nil,
 	)
-	utility.ErrorLog("Failed to declare a queue", err)
+	if err != nil {
+		conn.Close()
+		log.Fatalf("%s: %s", "Failed to declare a queue", err)
+	}
 
 	err = ch.Qos(
 		config.Client.Prefetch.Count,
 		config.Client.Prefetch.Size,
 		config.Client.Prefetch.Global,
 	)
-
-	utility.ErrorLog("Failed to set QoS", err)
+	if err != nil {
+		conn.Close()
+		log.Fatalf("%s: %s", "Failed to set QoS", err)
+	}
 
 	msgs, err := ch.Consume(
 		config.QueueName,
@@ -70,7 +78,11 @@ func connectRabbitMQ() {
 		config.Client.Consume.NoWait,
 		nil,
 	)
-	utility.ErrorLog("Failed to register a consumer", err)
+	if err != nil {
+		conn.Close()
+		log.Fatalf("%s: %s", "Failed to register a consumer", err)
+
+	}
 
 	forever := make(chan bool)
 

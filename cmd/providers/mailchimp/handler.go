@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bkway/gochimp"
-	"os"
-	"rabbinator/cmd/utility"
+	"log"
+	"rabbinator/cmd/providers"
 	"reflect"
 	"strings"
 )
@@ -14,7 +14,7 @@ import (
 const MemberStatusSubscribed gochimp.SubscriptionStatus = "subscribed"
 const MemberStatusPending gochimp.SubscriptionStatus = "pending"
 
-var queueStatus utility.QueueStatus
+var queueStatus providers.QueueStatus
 
 // Definition for mailchimp queue item.
 type QueueItem struct {
@@ -45,8 +45,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	// Exit from rabbinator. No point of constant requeue
 	// item if no api key is provided.
 	if apiKey == "" {
-		fmt.Println("Missing Mailchimp Api key. Exiting...")
-		os.Exit(1)
+		log.Fatalf("%s: %s", "Missing Mailchimp Api key. Exiting...", err)
 	}
 
 	// Start Mailchimp client.

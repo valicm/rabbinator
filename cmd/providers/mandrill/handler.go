@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bkway/gochimp/mandrill"
-	"os"
-	"rabbinator/cmd/utility"
+	"log"
+	"rabbinator/cmd/providers"
 )
 
-var queueStatus utility.QueueStatus
+var queueStatus providers.QueueStatus
 
 // Definition for Mandrill queue item.
 type QueueItem struct {
@@ -36,8 +36,7 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 	// Exit from rabbinator. No point of constant requeue
 	// item if no api key is provided.
 	if apiKey == "" {
-		fmt.Println("Missing Mandrill Api key. Exiting...")
-		os.Exit(1)
+		log.Fatalf("%s: %s", "Missing Mandrill Api key. Exiting...", err)
 	}
 
 	client := mandrill.NewClient(apiKey)
