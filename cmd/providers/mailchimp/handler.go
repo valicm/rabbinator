@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bkway/gochimp"
 	"log"
+	"log/syslog"
 	"rabbinator/cmd/providers"
 	"reflect"
 	"strings"
@@ -15,6 +16,13 @@ const MemberStatusSubscribed gochimp.SubscriptionStatus = "subscribed"
 const MemberStatusPending gochimp.SubscriptionStatus = "pending"
 
 var queueStatus providers.QueueStatus
+
+func init()  {
+	logwriter, e := syslog.New(syslog.LOG_ERR, "rabbitmq_mailchimp_log")
+	if e == nil {
+		log.SetOutput(logwriter)
+	}
+}
 
 // Definition for mailchimp queue item.
 type QueueItem struct {
@@ -82,7 +90,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	// Use method for adding/updating members.
 	subscribe, err := client.UpsertMember(data.Args.ListId, &memberData)
 	if err != nil {
-		fmt.Println("There was an error:", err)
+		log.Print("mailchimp unable to make subscription:", err)
 		return queueStatus.Reject
 	}
 
@@ -95,6 +103,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	}
 
 	// Retry item. If we reached here, some strange error occurred.
+	log.Print("mailchimp returns faulty response:", subscribe)
 	return queueStatus.Retry
 
 }

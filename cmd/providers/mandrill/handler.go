@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bkway/gochimp/mandrill"
 	"log"
+	"log/syslog"
 	"rabbinator/cmd/providers"
 )
 
@@ -19,6 +20,13 @@ type QueueItem struct {
 		Module string `json:"module, omitempty"`
 		mandrill.Message
 	} `json:"message"`
+}
+
+func init()  {
+	logwriter, e := syslog.New(syslog.LOG_ERR, "rabbitmq_mandrill_log")
+	if e == nil {
+		log.SetOutput(logwriter)
+	}
 }
 
 // Process queue item. Unmarshal data to Mandrill struct
@@ -59,7 +67,7 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 
 	send, err := client.MessagesSendTemplate(templateId, templateContent, &data.Data.Message, true, map[string]string{})
 	if err != nil {
-		fmt.Println("There was an error:", err)
+		log.Print("mandrill is unable to send message:", err)
 		return queueStatus.Retry
 	}
 
@@ -69,9 +77,14 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 	// Reject or requeue messages depending on status received from Mandrill.
 	switch sentStatus {
 	case "rejected":
-	case "invalid":
-	case "error":
+		log.Print("mandrill rejected email with following details:", send[0])
 		return queueStatus.Reject
+	case "invalid":
+		log.Print("mandrill returned invalid sent status:", send[0])
+		return queueStatus.Unknown
+	case "error":
+		log.Print("mandrill returned error:", send[0])
+		return queueStatus.Retry
 	}
 
 	// Mark message as delivered.
