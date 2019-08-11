@@ -1,0 +1,8 @@
+type: "mandrill"
+apiKey: "your_api_key"
+queueName: "rabbitmq_name_of_mandrill_queue"
+templates:
+  default: "my_custom_templates"
+  modules:
+    my_modules_name : "pero"
+    commerce: "template_for_customer"
