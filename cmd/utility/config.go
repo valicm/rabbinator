@@ -2,7 +2,6 @@ package utility
 
 import (
 	"github.com/spf13/viper"
-	"log"
 )
 
 // Configuration struct definition.
@@ -63,10 +62,10 @@ func ConfigSetup(consumer string, configDir string) Config {
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error if desired
-			log.Fatalf("%s: %s", "Config file does not exist", err)
+			InitErrorHandler("Config file does not exist", err)
 		} else {
 			// Config file was found but another error was produced
-			log.Fatalf("%s: %s", "Fatal error config file:", err)
+			InitErrorHandler("Fatal error config file:", err)
 		}
 	}
 
@@ -80,18 +79,16 @@ func ConfigSetup(consumer string, configDir string) Config {
 	var config Config
 
 	err := viper.Unmarshal(&config)
-	if err != nil {
-		log.Fatalf("%s: %s", "unable to decode into config struct", err)
-	}
+	InitErrorHandler("unable to decode into config struct", err)
 
 	// Check supported queue type.
 	if config.Type != "mandrill" && config.Type != "mailchimp" {
-		log.Fatalf("%s: %s", "you are using unsupported provider type", err)
+		InputErrorHandler("you are using unsupported provider type")
 	}
 
 	// Channel is required.
 	if config.QueueName == "" {
-		log.Fatalf("%s: %s", "queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name", err)
+		InputErrorHandler("queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name")
 	}
 
 	return config

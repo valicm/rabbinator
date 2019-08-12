@@ -35,18 +35,13 @@ func connectRabbitMQ() {
 
 	// Start connection.
 	conn, err := amqp.Dial(config.Client.Uri)
-	if err != nil {
-		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
-	}
+	utility.InitErrorHandler("Failed to connect to RabbitMQ", err)
 
 	ch, err := conn.Channel()
-	if err != nil {
-		conn.Close()
-		log.Fatalf("%s: %s", "Failed to open a channel", err)
-	}
+	utility.InitErrorHandler("Failed to open a channel", err)
 
 	// Declare queue.
-	q, err := ch.QueueDeclare(
+	_, err = ch.QueueDeclare(
 		config.QueueName,
 		config.Client.Queue.Durable,
 		config.Client.Queue.AutoDelete,
@@ -54,35 +49,25 @@ func connectRabbitMQ() {
 		config.Client.Queue.NoWait,
 		nil,
 	)
-	if err != nil {
-		conn.Close()
-		log.Fatalf("%s: %s", "Failed to declare a queue", err)
-	}
+	utility.InitErrorHandler("Failed to declare a queue", err)
 
 	err = ch.Qos(
 		config.Client.Prefetch.Count,
 		config.Client.Prefetch.Size,
 		config.Client.Prefetch.Global,
 	)
-	if err != nil {
-		conn.Close()
-		log.Fatalf("%s: %s", "Failed to set QoS", err)
-	}
+	utility.InitErrorHandler("Failed to set QoS", err)
 
 	msgs, err := ch.Consume(
 		config.QueueName,
-		config.Consumer + q.Name,
+		config.Consumer,
 		config.Client.Consume.AutoAck,
 		config.Client.Consume.Exclusive,
 		config.Client.Consume.NoLocal,
 		config.Client.Consume.NoWait,
 		nil,
 	)
-	if err != nil {
-		conn.Close()
-		log.Fatalf("%s: %s", "Failed to register a consumer", err)
-
-	}
+	utility.InitErrorHandler("Failed to register a consumer", err)
 
 	forever := make(chan bool)
 
