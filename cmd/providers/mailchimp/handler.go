@@ -42,11 +42,11 @@ type QueueItem struct {
 func ProcessItem(QueueBody []byte, apiKey string) string {
 	var data QueueItem
 
-	fmt.Printf("ehaaa")
-
 	err := json.Unmarshal(QueueBody, &data)
+	// If we have mapping issue, just print an error in the log and continue.
+	// Probably could be minor / not blocking mapping, so we can let it hopefully.
 	if err != nil {
-		fmt.Println("There was an error in data mapping:", err)
+		log.Println("There was an error in data mapping: ", err)
 	}
 
 	// We should not reach here, but if we are.
@@ -90,7 +90,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	// Use method for adding/updating members.
 	subscribe, err := client.UpsertMember(data.Args.ListId, &memberData)
 	if err != nil {
-		log.Print("mailchimp unable to make subscription:", err)
+		log.Print("mailchimp unable to make subscription api call due to error: ", err)
 		return queueStatus.Reject
 	}
 

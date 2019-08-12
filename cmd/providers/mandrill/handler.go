@@ -2,7 +2,6 @@ package mandrill
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/bkway/gochimp/mandrill"
 	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
@@ -35,16 +34,17 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 	var data QueueItem
 
 	err := json.Unmarshal(QueueBody, &data)
-	// If we have mapping issue, just print an error and continue.
+	// If we have mapping issue, just print an error in the log and continue.
+	// Probably could be minor / not blocking mapping, so we can let it hopefully.
 	if err != nil {
-		fmt.Println("There was an error in data mapping:", err)
+		log.Print("There was an error in data mapping: ", err)
 	}
 
 	// We should not reach here, but if we are.
 	// Exit from rabbinator. No point of constant requeue
 	// item if no api key is provided.
 	if apiKey == "" {
-		log.Fatalf("%s: %s", "Missing Mandrill Api key. Exiting...", err)
+		log.Fatal("Missing Mandrill Api key. Exiting...")
 	}
 
 	client := mandrill.NewClient(apiKey)
@@ -67,7 +67,7 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 
 	send, err := client.MessagesSendTemplate(templateId, templateContent, &data.Data.Message, true, map[string]string{})
 	if err != nil {
-		log.Print("mandrill is unable to send message:", err)
+		log.Print("mandrill is unable to send message due to error: ", err)
 		return queueStatus.Retry
 	}
 
@@ -77,13 +77,13 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 	// Reject or requeue messages depending on status received from Mandrill.
 	switch sentStatus {
 	case "rejected":
-		log.Print("mandrill rejected email with following details:", send[0])
+		log.Print("mandrill rejected email with following details: ", send[0])
 		return queueStatus.Reject
 	case "invalid":
-		log.Print("mandrill returned invalid sent status:", send[0])
+		log.Print("mandrill returned invalid sent status: ", send[0])
 		return queueStatus.Unknown
 	case "error":
-		log.Print("mandrill returned error:", send[0])
+		log.Print("mandrill returned error: ", send[0])
 		return queueStatus.Retry
 	}
 
