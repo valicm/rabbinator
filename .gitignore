@@ -1,6 +1,7 @@
 ### Go ###
 # Binaries for programs and plugins
 vendor/
+dist/
 
 # Test binary, build with `go test -c`
 *.test
