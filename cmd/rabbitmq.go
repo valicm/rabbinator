@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/streadway/amqp"
 	"github.com/valicm/rabbinator/cmd/providers/mailchimp"
 	"github.com/valicm/rabbinator/cmd/providers/mandrill"
@@ -49,9 +50,11 @@ func connectRabbitMQ() {
 	// Start connection.
 	conn, err := amqp.Dial(config.Client.Uri)
 	utility.InitErrorHandler("Failed to connect to RabbitMQ", err)
+	defer conn.Close()
 
 	ch, err := conn.Channel()
 	utility.InitErrorHandler("Failed to open a channel", err)
+	defer ch.Close()
 
 	// Declare queue.
 	_, err = ch.QueueDeclare(
