@@ -6,6 +6,7 @@ import (
 	"github.com/valicm/rabbinator/cmd/providers/mandrill"
 	"github.com/valicm/rabbinator/cmd/utility"
 	"log"
+	"log/syslog"
 )
 
 // Defines statuses upon we decide what we are doing
@@ -26,8 +27,20 @@ func Initialize(consumer string, configDir string)  {
 	// Initialize and set config.
 	config = utility.ConfigSetup(consumer, configDir)
 
+	// Set syslog.
+	initializeLogger()
+
 	// Make connection to RabbitMQ.
 	connectRabbitMQ()
+}
+
+// Set syslog for later log writes.
+func initializeLogger() {
+	tag := "rabbitmq_log" + config.Type
+	logwriter, e := syslog.New(syslog.LOG_ERR, tag)
+	if e == nil {
+		log.SetOutput(logwriter)
+	}
 }
 
 // Rabbit connection handler and processing items.

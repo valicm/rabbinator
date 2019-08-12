@@ -5,7 +5,6 @@ import (
 	"github.com/bkway/gochimp/mandrill"
 	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
-	"log/syslog"
 )
 
 var queueStatus providers.QueueStatus
@@ -19,13 +18,6 @@ type QueueItem struct {
 		Module string `json:"module, omitempty"`
 		mandrill.Message
 	} `json:"message"`
-}
-
-func init()  {
-	logwriter, e := syslog.New(syslog.LOG_ERR, "rabbitmq_mandrill_log")
-	if e == nil {
-		log.SetOutput(logwriter)
-	}
 }
 
 // Process queue item. Unmarshal data to Mandrill struct

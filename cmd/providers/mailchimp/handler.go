@@ -7,7 +7,6 @@ import (
 	"github.com/bkway/gochimp"
 	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
-	"log/syslog"
 	"reflect"
 	"strings"
 )
@@ -16,13 +15,6 @@ const MemberStatusSubscribed gochimp.SubscriptionStatus = "subscribed"
 const MemberStatusPending gochimp.SubscriptionStatus = "pending"
 
 var queueStatus providers.QueueStatus
-
-func init()  {
-	logwriter, e := syslog.New(syslog.LOG_ERR, "rabbitmq_mailchimp_log")
-	if e == nil {
-		log.SetOutput(logwriter)
-	}
-}
 
 // Definition for mailchimp queue item.
 type QueueItem struct {
