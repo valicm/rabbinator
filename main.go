@@ -24,8 +24,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/valicm/rabbinator/cmd"
 	"os"
-	"rabbinator/cmd"
 )
 
 var (

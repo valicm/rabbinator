@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bkway/gochimp"
+	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
 	"log/syslog"
-	"rabbinator/cmd/providers"
 	"reflect"
 	"strings"
 )

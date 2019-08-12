@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"github.com/streadway/amqp"
+	"github.com/valicm/rabbinator/cmd/providers/mailchimp"
+	"github.com/valicm/rabbinator/cmd/providers/mandrill"
+	"github.com/valicm/rabbinator/cmd/utility"
 	"log"
-	"rabbinator/cmd/providers/mailchimp"
-	"rabbinator/cmd/providers/mandrill"
-	"rabbinator/cmd/utility"
 )
 
 // Defines statuses upon we decide what we are doing

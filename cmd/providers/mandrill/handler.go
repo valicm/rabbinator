@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bkway/gochimp/mandrill"
+	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
 	"log/syslog"
-	"rabbinator/cmd/providers"
 )
 
 var queueStatus providers.QueueStatus
