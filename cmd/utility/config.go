@@ -53,6 +53,7 @@ func ConfigSetup(consumer string, configDir string) Config {
 	// Otherwise use provided configuration directory from -config flag.
 	if len(configDir) == 0 {
 		viper.AddConfigPath("$HOME/.rabbinator")
+		viper.AddConfigPath("/etc/rabbinator")
 		viper.AddConfigPath(".")
 	} else {
 		viper.AddConfigPath(configDir)
