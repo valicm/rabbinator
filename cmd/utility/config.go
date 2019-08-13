@@ -2,6 +2,8 @@ package utility
 
 import (
 	"github.com/spf13/viper"
+	"os"
+	"time"
 )
 
 // Configuration struct definition.
@@ -41,7 +43,10 @@ func ConfigSetup(consumer string, configDir string) Config {
 
 	// Set default config values.
 	defaultConfigSet()
-	viper.SetDefault("consumerTag", consumer)
+	// Make readable name for consumer tag based on hostname and filename.
+	// So we have option to use same config across multiple servers
+	// with different consumer tag.
+	viper.SetDefault("consumer", consumer + setConsumerTag())
 
 	// YML based configuration.
 	viper.SetConfigType("yaml")
@@ -118,4 +123,15 @@ func defaultConfigSet() {
 	viper.SetDefault("client.consume.nolocal", false)
 	viper.SetDefault("client.consume.noWait", false)
 
+}
+
+// Get hostname if possible as part of consumer tag name.
+// Otherwise use something random as current time.
+func setConsumerTag() string{
+	name, err := os.Hostname()
+	if err != nil {
+		return "-" + time.StampMilli
+	}
+
+	return "-" + name
 }
