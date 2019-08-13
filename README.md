@@ -25,7 +25,7 @@ RabbitMQ connection and channel information are configurable trough YAML file.
 Basic usage example: `./rabbinator -consumer=my_consumer_config_file`
 
 * required flag `consumer` - used to load configuration YAML file, and to set consumer tag in RabbitMQ
-* configuration file (`my_consumer_config_file.yml`) is inside a current directory or `$HOME/.rabbinator`
+* configuration file (`my_consumer_config_file.yml`) is inside a current directory, `$HOME/.rabbinator` or `/etc/rabbinator`
 * optional flag `config` - if you want to specify a different location for configuration file then is provided by default
 * minimum configuration file needed to run `rabbinator` and consume messages:
 ```
