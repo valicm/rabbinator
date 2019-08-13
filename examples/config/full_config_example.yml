@@ -2,7 +2,7 @@ type: "mandrill"
 apiKey: "your_api_key"
 queueName: "rabbitmq_name_of_mandrill_queue"
 client:
-  uri: "amqp://guest:guest@foreo.loc:5672"
+  uri: "amqp://guest:guest@localhost:5672"
   queue:
     durable: true
     autodelete: false

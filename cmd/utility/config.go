@@ -101,7 +101,7 @@ func defaultConfigSet() {
 	viper.SetDefault("apiKey", "")
 
 	// Set rabbitmq settings.
-	viper.SetDefault("client.uri", "amqp://guest:guest@foreo.loc:5672")
+	viper.SetDefault("client.uri", "amqp://guest:guest@localhost:5672")
 
 	viper.SetDefault("client.queue.durable", true)
 	viper.SetDefault("client.queue.autodelete", false)
