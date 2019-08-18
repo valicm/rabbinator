@@ -20,11 +20,11 @@ var queueStatus providers.QueueStatus
 type queueItem struct {
 	Args struct {
 		Email       string                 `json:"email"`
-		EmailType   string                 `json:"email_type, omitempty"`
+		EmailType   string                 `json:"email_type,omitempty"`
 		ListId      string                 `json:"list_id"`
 		DoubleOptin bool                   `json:"double_optin"`
-		Format      string                 `json:"format, omitempty"`
-		MergeVars   map[string]interface{} `json:"merge_vars, omitempty"`
+		Format      string                 `json:"format,omitempty"`
+		MergeVars   map[string]interface{} `json:"merge_vars,omitempty"`
 		Interests   map[string]bool        `json:"interests,omitempty"`
 	} `json:"args"`
 }

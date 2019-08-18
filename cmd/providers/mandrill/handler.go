@@ -15,7 +15,7 @@ type queueItem struct {
 		// Specifics for Drupal module mandrill output
 		// Otherwise we could directly map mandrill.Message struct.
 		Id     string `json:"id"`
-		Module string `json:"module, omitempty"`
+		Module string `json:"module,omitempty"`
 		mandrill.Message
 	} `json:"message"`
 }
