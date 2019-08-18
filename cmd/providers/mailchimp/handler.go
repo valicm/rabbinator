@@ -62,9 +62,10 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 				// If member is already subscribed, we don't need to send
 				// it again.
 				return queueStatus.Success
-			} else {
-				memberStatus = memberStatusPending
 			}
+
+			memberStatus = memberStatusPending
+
 		}
 	}
 
