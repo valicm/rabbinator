@@ -11,13 +11,13 @@ import (
 	"strings"
 )
 
-const MemberStatusSubscribed gochimp.SubscriptionStatus = "subscribed"
-const MemberStatusPending gochimp.SubscriptionStatus = "pending"
+const memberStatusSubscribed gochimp.SubscriptionStatus = "subscribed"
+const memberStatusPending gochimp.SubscriptionStatus = "pending"
 
 var queueStatus providers.QueueStatus
 
-// Definition for mailchimp queue item.
-type QueueItem struct {
+// Definition for Mailchimp queue item.
+type queueItem struct {
 	Args struct {
 		Email       string                 `json:"email"`
 		EmailType   string                 `json:"email_type, omitempty"`
@@ -29,10 +29,10 @@ type QueueItem struct {
 	} `json:"args"`
 }
 
-// Process queue item. Unmarshal data to Mailchimp struct
+// ProcessItem Unmarshal data to Mailchimp struct
 // Preform API calls and return string response.
 func ProcessItem(QueueBody []byte, apiKey string) string {
-	var data QueueItem
+	var data queueItem
 
 	err := json.Unmarshal(QueueBody, &data)
 	// If we have mapping issue, just print an error in the log and continue.
@@ -51,19 +51,19 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	// Start Mailchimp client.
 	client := gochimp.NewClient(apiKey)
 
-	var memberStatus = MemberStatusSubscribed
+	var memberStatus = memberStatusSubscribed
 
 	// If double opt-in is required, set member status to 'pending',
 	// but only if the user isn't already subscribed.
 	if data.Args.DoubleOptin {
 		memberInfo, err := client.Member(data.Args.ListId, data.Args.Email)
 		if err == nil {
-			if memberInfo.Status == MemberStatusSubscribed {
+			if memberInfo.Status == memberStatusSubscribed {
 				// If member is already subscribed, we don't need to send
 				// it again.
 				return queueStatus.Success
 			} else {
-				memberStatus = MemberStatusPending
+				memberStatus = memberStatusPending
 			}
 		}
 	}

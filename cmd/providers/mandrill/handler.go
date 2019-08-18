@@ -10,7 +10,7 @@ import (
 var queueStatus providers.QueueStatus
 
 // Definition for Mandrill queue item.
-type QueueItem struct {
+type queueItem struct {
 	Data struct {
 		// Specifics for Drupal module mandrill output
 		// Otherwise we could directly map mandrill.Message struct.
@@ -20,10 +20,10 @@ type QueueItem struct {
 	} `json:"message"`
 }
 
-// Process queue item. Unmarshal data to Mandrill struct
+// ProcessItem unmarshal data to Mandrill struct
 // Preform API calls and return allowed string for status.
 func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, moduleTemplates map[string]string) string {
-	var data QueueItem
+	var data queueItem
 
 	err := json.Unmarshal(QueueBody, &data)
 	// If we have mapping issue, just print an error in the log and continue.

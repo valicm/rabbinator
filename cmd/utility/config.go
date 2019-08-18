@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Configuration struct definition.
+// Config struct definition.
 type Config struct {
 	Type      string `yaml:"type"`
 	QueueName string `yaml:"queueName"`
@@ -38,7 +38,7 @@ type Config struct {
 	} `yaml:"templates, omitempty"`
 }
 
-// Check config file and build configuration array.
+// ConfigSetup Check config file and build configuration array.
 func ConfigSetup(consumer string, configDir string) Config {
 
 	// Set default config values.
@@ -89,12 +89,12 @@ func ConfigSetup(consumer string, configDir string) Config {
 
 	// Check supported queue type.
 	if config.Type != "mandrill" && config.Type != "mailchimp" {
-		InputErrorHandler("you are using unsupported provider type")
+		inputErrorHandler("you are using unsupported provider type")
 	}
 
 	// Channel is required.
 	if config.QueueName == "" {
-		InputErrorHandler("queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name")
+		inputErrorHandler("queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name")
 	}
 
 	return config

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Helper for printing errors and exiting the program.
+// InitErrorHandler print errors and exit the program.
 // Use for initialization task before we enter forever loop
 // for processing queues. Setup config, connecting to RabbitMQ.
 func InitErrorHandler(message string, err error) {
@@ -15,9 +15,9 @@ func InitErrorHandler(message string, err error) {
 	}
 }
 
-// User related errors during configuration, etc..
+// inputErrorHandler handle user related errors during configuration, etc..
 // Not really any dev errors probably. Just unsupported choices.
-func InputErrorHandler(message string) {
+func inputErrorHandler(message string) {
 	fmt.Print(message + "\n")
 	os.Exit(1)
 }

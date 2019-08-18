@@ -13,10 +13,10 @@ import (
 // Defines statuses upon we decide what we are doing
 // with that message.
 const (
-	QueueSuccess = "success"
-	QueueReject  = "reject"
-	QueueRetry   = "retry"
-	QueueUnknown = "unknown"
+	queueSuccess = "success"
+	queueReject  = "reject"
+	queueRetry   = "retry"
+	queueUnknown = "unknown"
 )
 
 // Stored configuration for processing queue.
@@ -102,7 +102,7 @@ func connectRabbitMQ() {
 // TODO: make it dynamic?
 func processQueueItem(Delivery amqp.Delivery) {
 	// Set defaults.
-	result := QueueUnknown
+	result := queueUnknown
 
 	// Ignore default case. If type is not mapped
 	// item would be discarded from RabbitMQ.
@@ -115,11 +115,11 @@ func processQueueItem(Delivery amqp.Delivery) {
 
 	// Use reject for rejecting and requeue of items.
 	switch result {
-	case QueueSuccess:
+	case queueSuccess:
 		Delivery.Ack(true)
-	case QueueReject:
+	case queueReject:
 		Delivery.Reject(false)
-	case QueueRetry:
+	case queueRetry:
 		Delivery.Reject(true)
 	default:
 		Delivery.Nack(true, false)
