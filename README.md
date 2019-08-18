@@ -1,6 +1,8 @@
 # rabbinator
 My first lines of code in GO language. Feedback, pull requests appreciated!
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/valicm/rabbinator)](https://goreportcard.com/report/github.com/valicm/rabbinator)
+
 # About 
 `rabbinator` is a RabbitMQ consumer (worker) written in GO with support for processing Mailchimp and Mandrill 
 queue items.
