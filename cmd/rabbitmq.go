@@ -13,9 +13,9 @@ import (
 // Defines statuses upon we decide what we are doing
 // with that message.
 const (
-	QueueSuccess  = "success"
+	QueueSuccess = "success"
 	QueueReject  = "reject"
-	QueueRetry  = "retry"
+	QueueRetry   = "retry"
 	QueueUnknown = "unknown"
 )
 
@@ -23,7 +23,7 @@ const (
 var config utility.Config
 
 // Initialize all task necessarily for establishing connection.
-func Initialize(consumer string, configDir string)  {
+func Initialize(consumer string, configDir string) {
 
 	// Initialize and set config.
 	config = utility.ConfigSetup(consumer, configDir)

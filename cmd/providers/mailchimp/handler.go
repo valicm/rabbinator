@@ -56,7 +56,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	// If double opt-in is required, set member status to 'pending',
 	// but only if the user isn't already subscribed.
 	if data.Args.DoubleOptin {
-		memberInfo, err :=client.Member(data.Args.ListId, data.Args.Email)
+		memberInfo, err := client.Member(data.Args.ListId, data.Args.Email)
 		if err == nil {
 			if memberInfo.Status == MemberStatusSubscribed {
 				// If member is already subscribed, we don't need to send
@@ -70,7 +70,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 
 	// Construct our local member variable.
 	var memberData = gochimp.Member{
-		Id : generateUserId(data.Args.Email),
+		Id:           generateUserId(data.Args.Email),
 		EmailAddress: data.Args.Email,
 		EmailType:    gochimp.EmailType(data.Args.Format),
 		Status:       memberStatus,

@@ -12,3 +12,4 @@ dist/
 ### Intellij ###
 # User-specific stuff:
 .idea/
+.vscode/

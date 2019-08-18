@@ -30,7 +30,7 @@ import (
 
 var (
 	consumer = flag.String("consumer", "", "Consumer tag, should be unique. Used for distinction between multiple consumers.")
-	config  = flag.String("config", "", "Optional. Declare specific directory where config files are located. Etc. /var/www/my_directory")
+	config   = flag.String("config", "", "Optional. Declare specific directory where config files are located. Etc. /var/www/my_directory")
 )
 
 func main() {

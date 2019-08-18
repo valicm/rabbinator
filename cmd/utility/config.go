@@ -32,8 +32,8 @@ type Config struct {
 			NoWait    bool `yaml:"nowait, omitempty"`
 		} `yaml:"consume"`
 	} `yaml:"client"`
-	Templates struct{
-		Default string `yaml:"default, omitempty"`
+	Templates struct {
+		Default string            `yaml:"default, omitempty"`
 		Modules map[string]string `yaml:"modules, omitempty"`
 	} `yaml:"templates, omitempty"`
 }
@@ -46,7 +46,7 @@ func ConfigSetup(consumer string, configDir string) Config {
 	// Make readable name for consumer tag based on hostname and filename.
 	// So we have option to use same config across multiple servers
 	// with different consumer tag.
-	viper.SetDefault("consumer", consumer + setConsumerTag())
+	viper.SetDefault("consumer", consumer+setConsumerTag())
 
 	// YML based configuration.
 	viper.SetConfigType("yaml")
@@ -127,7 +127,7 @@ func defaultConfigSet() {
 
 // Get hostname if possible as part of consumer tag name.
 // Otherwise use something random as current time.
-func setConsumerTag() string{
+func setConsumerTag() string {
 	name, err := os.Hostname()
 	if err != nil {
 		return "-" + time.StampMilli

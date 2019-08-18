@@ -22,7 +22,7 @@ type QueueItem struct {
 
 // Process queue item. Unmarshal data to Mandrill struct
 // Preform API calls and return allowed string for status.
-func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, moduleTemplates map[string]string) string{
+func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, moduleTemplates map[string]string) string {
 	var data QueueItem
 
 	err := json.Unmarshal(QueueBody, &data)
@@ -41,7 +41,7 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 
 	client := mandrill.NewClient(apiKey)
 
-	var templateContent [] mandrill.Variable
+	var templateContent []mandrill.Variable
 
 	templateContent = append(templateContent, mandrill.Variable{
 		Name:    "body",
