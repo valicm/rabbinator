@@ -94,7 +94,7 @@ func ConfigSetup(consumer string, configDir string) Config {
 
 	// Channel is required.
 	if config.QueueName == "" {
-		inputErrorHandler("queue name which you want to consume is required to be defined in yaml file. Yaml key: queue_name")
+		inputErrorHandler("queue name which you want to consume is required to be defined in yaml file. Yaml key: queueName")
 	}
 
 	return config
