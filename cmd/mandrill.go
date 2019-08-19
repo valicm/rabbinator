@@ -1,16 +1,13 @@
-package mandrill
+package cmd
 
 import (
 	"encoding/json"
 	"github.com/bkway/gochimp/mandrill"
-	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
 )
 
-var queueStatus providers.QueueStatus
-
 // Definition for Mandrill queue item.
-type queueItem struct {
+type queueItemMandrill struct {
 	Data struct {
 		// Specifics for Drupal module mandrill output
 		// Otherwise we could directly map mandrill.Message struct.
@@ -20,10 +17,10 @@ type queueItem struct {
 	} `json:"message"`
 }
 
-// ProcessItem unmarshal data to Mandrill struct
+// processMandrillItem unmarshal data to Mandrill struct
 // Preform API calls and return allowed string for status.
-func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, moduleTemplates map[string]string) string {
-	var data queueItem
+func processMandrillItem(QueueBody []byte, apiKey string, defaultTemplate string, moduleTemplates map[string]string) string {
+	var data queueItemMandrill
 
 	err := json.Unmarshal(QueueBody, &data)
 	// If we have mapping issue, just print an error in the log and continue.
@@ -60,7 +57,7 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 	send, err := client.MessagesSendTemplate(templateId, templateContent, &data.Data.Message, true, map[string]string{})
 	if err != nil {
 		log.Print("mandrill is unable to send message due to error: ", err)
-		return queueStatus.Retry
+		return queueRetry
 	}
 
 	// Get received status from Mandrill
@@ -70,16 +67,16 @@ func ProcessItem(QueueBody []byte, apiKey string, defaultTemplate string, module
 	switch sentStatus {
 	case "rejected":
 		log.Print("mandrill rejected email with following details: ", send[0])
-		return queueStatus.Reject
+		return queueReject
 	case "invalid":
 		log.Print("mandrill returned invalid sent status: ", send[0])
-		return queueStatus.Unknown
+		return queueUnknown
 	case "error":
 		log.Print("mandrill returned error: ", send[0])
-		return queueStatus.Retry
+		return queueRetry
 	}
 
 	// Mark message as delivered.
-	return queueStatus.Success
+	return queueSuccess
 
 }

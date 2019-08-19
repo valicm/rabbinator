@@ -3,8 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/streadway/amqp"
-	"github.com/valicm/rabbinator/cmd/providers/mailchimp"
-	"github.com/valicm/rabbinator/cmd/providers/mandrill"
 	"github.com/valicm/rabbinator/cmd/utility"
 	"log"
 	"log/syslog"
@@ -108,9 +106,9 @@ func processQueueItem(Delivery amqp.Delivery) {
 	// item would be discarded from RabbitMQ.
 	switch config.Type {
 	case "mandrill":
-		result = mandrill.ProcessItem(Delivery.Body, config.ApiKey, config.Templates.Default, config.Templates.Modules)
+		result = processMandrillItem(Delivery.Body, config.ApiKey, config.Templates.Default, config.Templates.Modules)
 	case "mailchimp":
-		result = mailchimp.ProcessItem(Delivery.Body, config.ApiKey)
+		result = processMailchimpItem(Delivery.Body, config.ApiKey)
 	}
 
 	// Use reject for rejecting and requeue of items.

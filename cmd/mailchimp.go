@@ -1,11 +1,10 @@
-package mailchimp
+package cmd
 
 import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"github.com/bkway/gochimp"
-	"github.com/valicm/rabbinator/cmd/providers"
 	"log"
 	"reflect"
 	"strings"
@@ -14,10 +13,8 @@ import (
 const memberStatusSubscribed gochimp.SubscriptionStatus = "subscribed"
 const memberStatusPending gochimp.SubscriptionStatus = "pending"
 
-var queueStatus providers.QueueStatus
-
 // Definition for Mailchimp queue item.
-type queueItem struct {
+type queueItemMailchimp struct {
 	Args struct {
 		Email       string                 `json:"email"`
 		EmailType   string                 `json:"email_type,omitempty"`
@@ -29,10 +26,10 @@ type queueItem struct {
 	} `json:"args"`
 }
 
-// ProcessItem Unmarshal data to Mailchimp struct
+// processMailchimpItem Unmarshal data to Mailchimp struct
 // Preform API calls and return string response.
-func ProcessItem(QueueBody []byte, apiKey string) string {
-	var data queueItem
+func processMailchimpItem(QueueBody []byte, apiKey string) string {
+	var data queueItemMailchimp
 
 	err := json.Unmarshal(QueueBody, &data)
 	// If we have mapping issue, just print an error in the log and continue.
@@ -61,7 +58,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 			if memberInfo.Status == memberStatusSubscribed {
 				// If member is already subscribed, we don't need to send
 				// it again.
-				return queueStatus.Success
+				return queueSuccess
 			}
 
 			memberStatus = memberStatusPending
@@ -84,7 +81,7 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	subscribe, err := client.UpsertMember(data.Args.ListId, &memberData)
 	if err != nil {
 		log.Print("mailchimp unable to make subscription api call due to error: ", err)
-		return queueStatus.Reject
+		return queueReject
 	}
 
 	// Why this: If we on response get proper mapping to SubscriptionStatus type
@@ -92,12 +89,12 @@ func ProcessItem(QueueBody []byte, apiKey string) string {
 	// integer as status, and gocimp library would map it to Member type, causing error.
 	// TODO: explore gochimp logging/error improvements possibility.
 	if reflect.TypeOf(subscribe.Status).Name() == "SubscriptionStatus" {
-		return queueStatus.Success
+		return queueSuccess
 	}
 
 	// Retry item. If we reached here, some strange error occurred.
 	log.Print("mailchimp returns faulty response:", subscribe)
-	return queueStatus.Retry
+	return queueRetry
 
 }
 
