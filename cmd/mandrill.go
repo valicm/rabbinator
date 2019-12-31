@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/bkway/gochimp/mandrill"
 	"log"
+	"reflect"
 )
 
 // Definition for Mandrill queue item.
@@ -27,6 +28,12 @@ func processMandrillItem(QueueBody []byte, apiKey string, defaultTemplate string
 	// Probably could be minor / not blocking mapping, so we can let it hopefully.
 	if err != nil {
 		log.Print("There was an error in data mapping: ", err)
+	}
+
+	// Check if we have filled mail array.
+	if data.mailEmpty() {
+		log.Print("You are trying to send mail without proper TO field. ")
+		return queueReject
 	}
 
 	// We should not reach here, but if we are.
@@ -80,3 +87,9 @@ func processMandrillItem(QueueBody []byte, apiKey string, defaultTemplate string
 	return queueSuccess
 
 }
+
+// Check if we have proper mail address.
+func (data queueItemMandrill) mailEmpty() bool {
+	return reflect.DeepEqual(data.Data.To, mandrill.Message{To: []mandrill.Recipient{}})
+}
+
