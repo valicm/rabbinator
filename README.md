@@ -2,6 +2,7 @@
 My first lines of code in GO language. Feedback, pull requests appreciated!
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/valicm/rabbinator)](https://goreportcard.com/report/github.com/valicm/rabbinator)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvalicm%2Frabbinator.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvalicm%2Frabbinator?ref=badge_shield)
 
 # About 
 `rabbinator` is a RabbitMQ consumer (worker) written in GO with support for processing Mailchimp and Mandrill 
@@ -102,3 +103,7 @@ _(note that $interests should always be object, avoid using an empty array - it 
 # Credits
 * Using `https://github.com/spf13/viper` for configuration management
 * Using `github.com/bkway/gochimp` for communication with Mandrill / Mailchimp API
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fvalicm%2Frabbinator.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fvalicm%2Frabbinator?ref=badge_large)
